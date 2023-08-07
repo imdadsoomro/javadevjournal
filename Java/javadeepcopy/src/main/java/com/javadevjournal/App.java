@@ -9,9 +9,8 @@ public class App
     public static void main( String[] args )
     {
         System.out.println( "Hello World!" );
-                String regex = "\\[(cf|fc|c|f){1}\\]\\{(\\d+|\\*)\\}";
-
-        String regexq = "\\[(cf|fc|c|f){1}\\]\\{\\d*\\*?\\}";
+        String regex = "^\\[(cf|fc|c|f)\\]$"; // For aggrgator inital
+        String regex1 = "^\\{(\\*|\\d+)\\}$"; //For number of offers.
     }
 
     public static boolean isValid(String pattern) {
