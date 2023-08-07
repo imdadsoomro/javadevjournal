@@ -6,6 +6,20 @@ package com.javadevjournal;
  */
 public class App 
 {
+        public static void main(String[] args) {
+        String input = "[]{*}";
+        
+        Pattern pattern = Pattern.compile("\\[(.*?)\\]\\{(.*?)\\}");
+        Matcher matcher = pattern.matcher(input);
+        
+        while (matcher.find()) {
+            String squareBracketValue = matcher.group(1); // Value inside square brackets
+            String curlyBracketValue = matcher.group(2); // Value inside curly brackets
+            System.out.println("Square Bracket Value: " + squareBracketValue);
+            System.out.println("Curly Bracket Value: " + curlyBracketValue);
+        }
+    }
+    
     public static void main( String[] args )
     {
         System.out.println( "Hello World!" );
