@@ -6,6 +6,27 @@ package com.javadevjournal;
  */
 public class App 
 {
+            public static boolean areBracketsValid(String input) {
+        Stack<Character> stack = new Stack<>();
+
+        for (char ch : input.toCharArray()) {
+            if (ch == '[' || ch == '{') {
+                stack.push(ch);
+            } else if (ch == ']' || ch == '}') {
+                if (stack.isEmpty()) {
+                    return false; // Unmatched closing bracket
+                }
+
+                char openBracket = stack.pop();
+                if ((ch == ']' && openBracket != '[') || (ch == '}' && openBracket != '{')) {
+                    return false; // Mismatched opening and closing brackets
+                }
+            }
+        }
+
+        return stack.isEmpty(); // Check if all opening brackets have corresponding closing brackets
+    }
+        
         public static void main(String[] args) {
 return input.contains("[") && input.contains("]") && input.contains("{") && input.contains("}");
                 int closingBracketIndex = input.indexOf(']');
