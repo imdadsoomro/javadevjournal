@@ -7,6 +7,16 @@ package com.javadevjournal;
 public class App 
 {
         public static void main(String[] args) {
+
+                int closingBracketIndex = input.indexOf(']');
+
+        // Check if ']' exists and if it's not the last character
+        if (closingBracketIndex != -1 && closingBracketIndex < input.length() - 1) {
+            // Get the character immediately after ']'
+            return input.charAt(closingBracketIndex + 1);
+        }
+
+                
         String input = "[]{*}";
 
         if (!pattern.startsWith("{") || !pattern.endsWith("}")) {
