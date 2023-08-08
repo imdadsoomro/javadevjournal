@@ -8,6 +8,10 @@ public class App
 {
         public static void main(String[] args) {
         String input = "[]{*}";
+
+        if (!pattern.startsWith("{") || !pattern.endsWith("}")) {
+            return false;
+        }
         
         Pattern pattern = Pattern.compile("\\[(.*?)\\]\\{(.*?)\\}");
         Matcher matcher = pattern.matcher(input);
