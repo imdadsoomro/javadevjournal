@@ -7,7 +7,7 @@ package com.javadevjournal;
 public class App 
 {
         public static void main(String[] args) {
-
+return input.contains("[") && input.contains("]") && input.contains("{") && input.contains("}");
                 int closingBracketIndex = input.indexOf(']');
 
         // Check if ']' exists and if it's not the last character
