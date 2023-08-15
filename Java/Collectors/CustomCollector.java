@@ -100,3 +100,21 @@ class CustomCollector {
     
 }
 }
+
+
+...
+
+    public static Map<String, CustomerOfferStatus> filterAndRetrieveMostRecent(List<CustomerOfferStatus> offerList) {
+        return offerList.stream()
+                .filter(offer -> offer.getOfferStatusChangeTimeStamp() != null) // Ignore objects with null offerStatusChangeTimeStamp
+                .collect(Collectors.toMap(
+                        CustomerOfferStatus::getOfferStatusName,
+                        customerOfferStatus -> customerOfferStatus,
+                        (existing, replacement) -> {
+                            if (existing.getOfferStatusChangeTimeStamp().compareTo(replacement.getOfferStatusChangeTimeStamp()) > 0) {
+                                return existing;
+                            }
+                            return replacement;
+                        }
+                ));
+    }
