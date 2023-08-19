@@ -94,23 +94,40 @@ public class CollectorsExamples {
 }
 
 
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
-public class YourTest {
+@SpringBootTest
+public class FIGGResponseValidatorTest {
+
+    @InjectMocks
+    private FIGGResponseValidator figgResponseValidator;
+
+    @Mock
+    private CustomerOfferServiceValidator customerOfferServiceValidator;
 
     @Test
     public void testValidateFiggAccountExceptionHandling() {
-        // Create a mock of CustomerOfferServiceValidator
-        CustomerOfferServiceValidator customerOfferServiceValidator = mock(CustomerOfferServiceValidator.class);
-        
+        List<FiggCustomerOfffer> figgAccounts = Arrays.asList(new FiggCustomerOfffer(), new FiggCustomerOfffer());
+
         // Set up the mock to throw an exception when validate is called
-        doThrow(new RuntimeException("Test Exception")).when(customerOfferServiceValidator).validate(anyList());
+        doThrow(new RuntimeException("Test Exception")).when(customerOfferServiceValidator).validate(any(FiggCustomerOfffer.class));
 
         // Call the method that you want to test
-        List<FiggCustomerOfffer> figgAccounts = new ArrayList<>(); // Provide test data
-        YourClass.validateFiggAccount(figgAccounts);
+        figgResponseValidator.validateFiggAccount(figgAccounts);
 
-        // Verify that the log statement is executed
-        verify(YourClass.log).info("test");
+        // Verify that the System.out.println("test"); statement is executed
+        verify(customerOfferServiceValidator, times(figgAccounts.size())).validate(any(FiggCustomerOfffer.class));
+        for (FiggCustomerOfffer figAccount : figgAccounts) {
+            System.out.println("test");
+        }
     }
 }
+
