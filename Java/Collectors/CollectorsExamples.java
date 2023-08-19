@@ -92,3 +92,25 @@ public class CollectorsExamples {
         System.out.println(strList);
     }
 }
+
+
+import static org.mockito.Mockito.*;
+
+public class YourTest {
+
+    @Test
+    public void testValidateFiggAccountExceptionHandling() {
+        // Create a mock of CustomerOfferServiceValidator
+        CustomerOfferServiceValidator customerOfferServiceValidator = mock(CustomerOfferServiceValidator.class);
+        
+        // Set up the mock to throw an exception when validate is called
+        doThrow(new RuntimeException("Test Exception")).when(customerOfferServiceValidator).validate(anyList());
+
+        // Call the method that you want to test
+        List<FiggCustomerOfffer> figgAccounts = new ArrayList<>(); // Provide test data
+        YourClass.validateFiggAccount(figgAccounts);
+
+        // Verify that the log statement is executed
+        verify(YourClass.log).info("test");
+    }
+}
