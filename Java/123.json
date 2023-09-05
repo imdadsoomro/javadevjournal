@@ -1,0 +1,345 @@
+{
+    "type": "record",
+    "name": "EirCRM",
+    "namespace": "com.cigna.crm.eir.crm_reporting_3_0_1",
+    "fields": [
+        {
+            "name": "dateCreated",
+            "type": "string"
+        },
+        {
+            "name": "interactionEventDate",
+            "type": "string"
+        },
+        {
+            "name": "communicationDirection",
+            "type": {
+                "type": "enum",
+                "name": "CommData",
+                "symbols": [
+                    "entityToCigna",
+                    "cignaToEntity"
+                ]
+            }
+        },
+        {
+            "name": "individualEnterpriseId",
+            "type": "string"
+        },
+        {
+            "name": "opportunityId",
+            "type": [
+                "string",
+                "null"
+            ],
+            "default": ""
+        },
+        {
+            "name": "sourceSystem",
+            "type": "string"
+        },
+        {
+            "name": "interactionEvent",
+            "type": "string"
+        },
+        {
+            "name": "publisher",
+            "type": {
+                "type": "enum",
+                "name": "Pub",
+                "symbols": [
+                    "crm",
+                    "systemsintegration"
+                ]
+            }
+        },
+        {
+            "name": "channelTypeCode",
+            "type": "string"
+        },
+        {
+            "name": "interactionPoint",
+            "type": [
+                "string",
+                "null"
+            ],
+            "default": ""
+        },
+        {
+            "name": "recordType",
+            "type": "string"
+        },
+        {
+            "name": "eirXtraInfo",
+            "type": {
+                "type": "record",
+                "name": "EirXtraData",
+                "fields": [
+                    {
+                        "name": "childOpportunityId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "cignaLocale",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": "en_us"
+                    },
+                    {
+                        "name": "interactionDescriptionEnUS",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "interactionEventDescription",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "sourceSystemOpportunityId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "contentSource",
+                        "type": "string"
+                    },
+                    {
+                        "name": "opportunityPath",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "contentTemplateName",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "contentTemplateType",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "oneviewInteractionID",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "referenceData",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "contactInfo",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "attemptCount",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "notificationId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "notificationTrackingId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "relatedNotificationTrackingId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "enterpriseIdType",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "interactionEventErrorCode",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "interactionEventErrorDescription",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "entityLocale",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": "en_us"
+                    },
+                    {
+                        "name": "callbackRequested",
+                        "type": [
+                            {
+                                "type": "enum",
+                                "name": "YesNoData",
+                                "symbols": [
+                                    "yes",
+                                    "no",
+                                    "Yes",
+                                    "No",
+                                    "YES",
+                                    "NO",
+                                    "Y",
+                                    "N",
+                                    "y",
+                                    "n"
+                                ]
+                            },
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "callbackTimePreference",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "callback",
+                        "type": [
+                            "YesNoData",
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "callbackTimeOfDay",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "callbackRepeat",
+                        "type": [
+                            "YesNoData",
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "transferSuceeded",
+                        "type": [
+                            "YesNoData",
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "transfer",
+                        "type": [
+                            "YesNoData",
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "transferSecond",
+                        "type": [
+                            "YesNoData",
+                            "null"
+                        ],
+                        "default": "No"
+                    },
+                    {
+                        "name": "callNetPromoter",
+                        "type": [
+                            {
+                                "type": "fixed",
+                                "name": "Byte",
+                                "size": 1
+                            },
+                            "null"
+                        ],
+                        "default": "0"
+                    },
+                    {
+                        "name": "pharmacyProductCode",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    },
+                    {
+                        "name": "leadKeyId",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": ""
+                    }
+                ]
+            }
+        }
+    ]
+}
