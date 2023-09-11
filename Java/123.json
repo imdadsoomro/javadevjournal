@@ -1,44 +1,76 @@
-​
-using terraform scripting, create an eventbridge rule with the following characteristics
-name: 'eio-destruct-ops-notify-team-sqs-archive'
-description: 'notify operations team of sqs archival events'
-event bus: 'eio-{env}-operations'
-matching pattern
-only matches 'messages.archived' events having an 'archiveCount' value greater than 0 ( see example below & aws documentation link as to how to define the pattern )
-targets
-lambda: eio-{env}-notify_team-pipeline-lambda
-input transformer
-input paths
-automationExecutionId = "$.detail.automationExecutionId"
-  sourceQueue = "$.detail.sourceQueue"
-  archiveCount = "$.detail.archiveCount"
-  archiveUri = "$.detail.archiveUri"
-  region = "$.region"
+resource "aws_eventbridge_rule" "example" {
+  name        = "eio-destruct-ops-notify-team-sqs-archive"
+  description = "notify operations team of sqs archival events"
+  event_bus_name = "eio-${var.env}-operations"
 
-input template
+  event_pattern = <<EOF
 {
-  "title": "SQS message(s) archived",
-  "severity": "info",
-  "message": "\n - __environment__: destruct\n - __archived message(s)__: <archiveCount>\n - __source queue__: '<sourceQueue>'\n",
-  "links": [
-    { "description": "archived message(s)", "url": "<archiveUri>" },
-    { "description": "automation execution", "url": "https://<region>.console.aws.amazon.com/systems-manager/automation/execution/<automationExecutionId>?region=<region>"}
-  ]
-}
-example "messages.archived" event on 'evir-destruct-operations' bus
-
-{
-  "id": "3cbd4cd9-e9f5-1198-62d9-8cb6e8ab6e8f",
-  "version": 0,
-  "time": "2023-09-01T18:04:11Z",
-  "region": "us-east-1",
-  "account": "183170819435",
-  "source": "evernorth.evir.operations",
-  "detail-type": "messages.archived",
+  "source": ["evernorth.evir.operations"],
+  "detail-type": ["messages.archived"],
   "detail": {
-    "automationExecutionId": "0922553a-364c-4f3f-a04f-8b73d79be2f0",
-    "sourceQueue": "https://sqs.us-east-1.amazonaws.com/183170819435/eio-destruct-imported-events-TEMP",
-    "archiveCount": 1,
-    "archiveUri": "s3://eio-destruct-operations-storage-183170819435/automation/archive_sqs_messages/eio-destruct-imported-events-TEMP/2023/09/01/0922553a-364c-4f3f-a04f-8b73d79be2f0.gz"
+    "archiveCount": [{"numeric": [">", 0]}]
   }
 }
+EOF
+}
+
+resource "aws_eventbridge_target" "example" {
+  rule      = aws_eventbridge_rule.example.name
+  target_id = "lambda-eio-${var.env}-notify_team-pipeline-lambda"
+  arn       = "arn:aws:lambda:<REGION>:<ACCOUNT_ID>:function/eio-${var.env}-notify_team-pipeline-lambda"
+}
+
+resource "aws_eventbridge_policy" "example" {
+  name        = "eio-destruct-ops-notify-team-sqs-archive-policy"
+  event_bus  = aws_eventbridge_rule.example.event_bus_name
+  statement {
+    action = "lambda:InvokeFunction"
+    condition {
+      key   = "aws:RequestTag/Environment"
+      test  = "StringEquals"
+      values = ["destruct"]
+    }
+    principal = "events.amazonaws.com"
+    effect    = "Allow"
+  }
+}
+
+resource "aws_eventbridge_target_policy" "example" {
+  target_id   = aws_eventbridge_target.example.id
+  policy_json = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "InvokePermission",
+        Effect = "Allow",
+        Principal = {
+          Service = "events.amazonaws.com"
+        },
+        Action = "lambda:InvokeFunction",
+      },
+    ],
+  })
+}
+
+resource "aws_eventbridge_rule_target" "example" {
+  rule_id = aws_eventbridge_rule.example.id
+  target_id = aws_eventbridge_target.example.id
+}
+
+resource "aws_eventbridge_rule_event_bus" "example" {
+  name = aws_eventbridge_rule.example.event_bus_name
+}
+
+resource "aws_eventbridge_archive" "example" {
+  name       = "example"
+  source_arn = aws_eventbridge_rule.example.arn
+}
+
+resource "aws_lambda_permission" "example" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = "eio-${var.env}-notify_team-pipeline-lambda"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_eventbridge_rule.example.arn
+}
+
