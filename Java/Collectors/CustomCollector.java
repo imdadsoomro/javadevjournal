@@ -1,98 +1,86 @@
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collector.Characteristics.IDENTITY_FINISH;
-
-class Student {
-    int marks;
-
-    Student() {
-    }
-
-    public Student(int i) {
-        this.marks = i;
-    }
-
-    Student addMarks(Student s) {
-        return new Student(this.marks = this.marks + s.marks);
-    }
-
-}
-
-class StudentCollector implements Collector<Student, Student, Student> {
-    @Override
-    public Supplier<Student> supplier() {
-        return Student::new;
-    }
-
-    @Override
-    public BiConsumer<Student, Student> accumulator() {
-        return Student::addMarks;
-    }
-
-    @Override
-    public BinaryOperator<Student> combiner() {
-        return Student::addMarks;
-    }
-
-    @Override
-    public Function<Student, Student> finisher() {
-        return Function.identity();
-    }
-
-    @Override
-    public Set<Characteristics> characteristics() {
-        return EnumSet.of(IDENTITY_FINISH);
-    }
-}
-
-
-class CustomCollector {
-    public static void main(String[] args) {
-
-        
-
-    
-}
-
-    private BigDecimal calculateLifetimeEarnedAmount(CustomerAccountInfoEntity customerAccountInfo) {
-    boolean cdlxEarnedAmountTimestampValid = isValidTimestamp(customerAccountInfo.getCdlxRedeemedAmountUpdateTs(), cdlxLifetimeAmountTimestampDifference);
-    boolean figgEarnedAmountTimestampValid = isValidTimestamp(customerAccountInfo.getFiggRedeemedAmountUpdateTs(), figgLifetimeAmountTimestampDifference);
-
-    if (!cdlxEarnedAmountTimestampValid || !figgEarnedAmountTimestampValid) {
-        return null;
-    }
-
-    BigDecimal lifetimeEarnedAmount = calculateLifetimeAmount(customerAccountInfo);
-    return lifetimeEarnedAmount;
-}
-
-private boolean isValidTimestamp(Timestamp timestamp, long maxTimestampDifference) {
-    if (timestamp != null) {
-        long timeDiff = Timestamp.from(Instant.now()).getTime() - timestamp.getTime();
-        long timeDiffMinutes = TimeUnit.MILLISECONDS.toMinutes(timeDiff);
-        log.info("Timestamp Difference: {}", timeDiffMinutes);
-        return timeDiffMinutes <= maxTimestampDifference;
-    }
-    return false;
-}
-
-private BigDecimal calculateLifetimeAmount(CustomerAccountInfoEntity customerAccountInfo) {
-    if (customerAccountInfo.getCdlxRedeemedAmountUpdateTs() == null && customerAccountInfo.getFiggRedeemedAmountUpdateTs() == null) {
-        return BigDecimal.valueOf(0);
-    }
-
-    BigDecimal cdlxAmount = customerAccountInfo.getCdlxLifetimeReedemedAmount() != null ?
-                            customerAccountInfo.getCdlxLifetimeReedemedAmount() : BigDecimal.valueOf(0);
-    BigDecimal figgAmount = customerAccountInfo.getFiggLifetimeReedemedAmount() != null ?
-                            customerAccountInfo.getFiggLifetimeReedemedAmount() : BigDecimal.valueOf(0);
-
-    return cdlxAmount.add(figgAmount);
-}
-
+{
+    "level": "DEBUG",
+    "location": "lambda_handler:93",
+    "message": "received event",
+    "timestamp": "2023-11-07 20:53:10,768+0000",
+    "service": "receive_customer_interaction_v1",
+    "cold_start": true,
+    "function_name": "eio-destruct-receive_customer_interaction_v1-pipeline-lambda",
+    "function_memory_size": "128",
+    "function_arn": "arn:aws:lambda:us-east-1:183170819435:function:eio-destruct-receive_customer_interaction_v1-pipeline-lambda:ProvisionedConcurrencyCurrent",
+    "function_request_id": "d9f9304c-29ae-4c31-b3db-4554cf3a45ae",
+    "esrxRequestId": "6182f235-1be9-4f92-b201-05e83f902a50",
+    "event": {
+        "version": "2.0",
+        "rawPath": "/evir/v1/interactions/customer/$ingest",
+        "headers": {
+            "X-Cf-Instanceid": "066ccb48-f193-4146-4f4b-0201",
+            "X-JWT-Assertion": "eyJ4NXQiOiJ1SjFMZEQ2TDhiWEhFRE9saTdUbld5TDNnTm8iLCJraWQiOiJ1SjFMZEQ2TDhiWEhFRE9saTdUbld5TDNnTm8iLCJhbGciOiJub25lIn0.eyJpc3MiOiJhcGktZ2F0ZXdheSIsInN1YiI6IkVWSVIgVGVzdGluZyBQb3N0bWFuIC0gSU5UIiwibmJmIjoxNjk5MzkwMDkwLCJleHAiOjE2OTkzOTA1MTAsImlhdCI6MTY5OTM5MDM5MCwianRpIjoiY2M2Y2IwMGItMDcyMC00ZGNkLWI1ZWUtMzgyZWY3MmY4NTVjIiwiZXNyeC52ZXJzaW9uIjoiMS4wIiwiYXVkIjoiUE9TVCAvYXJuOmF3czpsYW1iZGE6dXMtZWFzdC0xOjE4MzE3MDgxOTQzNTpmdW5jdGlvbjplaW8tZGVzdHJ1Y3QtcmVjZWl2ZV9jdXN0b21lcl9pbnRlcmFjdGlvbl92MS1waXBlbGluZS1sYW1iZGE6cHJvdmlzaW9uZWRjb25jdXJyZW5jeWN1cnJlbnQiLCJlc3J4LmlkZW50aXR5Ijp7InRva2VuVHlwZSI6Im0ybSIsImNsaWVudElkIjoiMWVkMmU2MmEtMmYxYy02NjkzLTk0NGYtZWVlZTBhZjljYzQ0IiwiY2xpZW50TmFtZSI6IkVWSVIgVGVzdGluZyBQb3N0bWFuIC0gSU5UIiwic3ViamVjdCI6IkVWSVIgVGVzdGluZyBQb3N0bWFuIC0gSU5UIiwiYXR0cnMiOnsidG9rZW5SZXNvdXJjZUlkIjoiMWVlN2RhYTMtNjk0Zi02Y2EzLTkwOWItZWVlZTBhZjQ3NDFiIiwidG9rZW5UeXBlIjoib2F1dGhfYWNjZXNzIn19LCJlc3J4LnJvb3QuaWRlbnRpdHkiOnsidG9rZW5UeXBlIjoibTJtIiwiY2xpZW50SWQiOiIxZWQyZTYyYS0yZjFjLTY2OTMtOTQ0Zi1lZWVlMGFmOWNjNDQiLCJjbGllbnROYW1lIjoiRVZJUiBUZXN0aW5nIFBvc3RtYW4gLSBJTlQiLCJzdWJqZWN0IjoiRVZJUiBUZXN0aW5nIFBvc3RtYW4gLSBJTlQiLCJhdHRycyI6eyJ0b2tlblJlc291cmNlSWQiOiIxZWU3ZGFhMy02OTRmLTZjYTMtOTA5Yi1lZWVlMGFmNDc0MWIiLCJ0b2tlblR5cGUiOiJvYXV0aF9hY2Nlc3MifSwic2VjdXJpdHlUb2tlbiI6IjI4QzFDNjA2RTIyRTdEQzIzRjNGNTlGRjQ5RUNFREM2NDc1M0UxQjUxMDRBOTZBRTRGQjI1QzRGRTAyRDVFNjNFREVEMDhFNzc1NDIyQjg2RjdGQ0MzMUI3QjE0REY4N0M3QjgwMEU1RDBBOTRBRTRFOTk3MjlGRTExQzFCMkI3RTYxNDdGQzRERjZCN0Q5M0JEMUI3NzFEMUFBMkYwQjJCQTkyNDY0NjgyQ0VCRTRBQkQ3MjM0QkUzOEYwQTQ3NEQwQTlCNURBOTI3QzZBNkJBREIyODZDRUJCNjM1RUYyRjIyNUU3OTY2NzQ1RUVGMTYyNTE3MDg1MzlCNjY0RDI2NUNDNUFDNjBCREJBNzdERDc3NUQ2RkE4NzhGODZDNEFGNzMxMDFDNjc2Q0ZEMTVBRjU1MDJCNjY3MzYyQ0RFQzA1MDNCRjQzMEFBNTg3RjNDMUNBRkJBRUIyMDYxOTM0QUM1NzI2RDIwN0UzOUM0Q0MwRjE3NTUzMUU5QzIzRTU4NUZFRDFDOTE3NUE4RjZGOEQ2MUM0RTA5NkM3Q0JCMDNCQjM2NEI5QTRGRTQ3ODIyQ0UyRjgwRTVFNDg4NjI3NDVERkQzMDk2MjAzMTI0QzcxMzNCMkRFQ0E3NkVGNEQ5QzgwMUQ4NjYxNzQ1MTIxNDFCQjBERTRDMEFFOUIyRTI2Mzk5NkZBODk3RUJGNUMwMzdGMjhCNzlBREY5REUzNTYwRUZCMzM5OUVENTI3MzI5MTREMkIxNzBFMjU2MkI2RkRBRDk3MUM0Q0ExMDkxQTlDQkMzQzM3MzgyQjNCMTU5RDkxNzAyNTdCNTUwRDYyOTEwNkU2RTRBQUI3MDhFMDY0QzM4MURFM0U4MkQ5M0M5NDVGQ0UyRjk5MzI0MDAxN0U1QUQyRTZCQUNBNjA3NzdBNUEzQTQyN0NGNzkxNTZBREU1N0JGMzMyNDQ1OUNCMjFBRUU1NUQ2RUVGQ0JFRjFGM0ZFMTg5M0QzMzE2RjQ4MzcwMDgwMTkxMjI3RUVGNTg0QTJBRTg0ODQ4RjYzOEJDMTM2QUFFNDYzOTBERjMyOTc5OTBERTNFMzI2RUM0QkFBQzFERTM4MEVDMTJDMERDQTY0RDUxMjk5M0IxMDJEMEY5RTNEMDFFOENFMEFBMTQyNjZDNTBDODYxMENBNUVDRjE2MERGMzg5QzcxRkFDRjM2RDA1MDY2ODcyQTgyNzU0QTU0QTgyMUY0MTU3OTk4RENBNDM1NDlEMThGMkQ1N0JGQTVDMUEzOENEN0I4NUE3MEFEN0FGNDk4QjRBMUJFRUNDNzNBRjA2REI0MkM0MDk2RkMyNjVEMEZDNjE3NkQ1QUQwMTI4QkUwNEFEQTY1OTE5QkM1OUVDOUI5RDY0RjM4Q0VGOUUyRTQ4MTBGNDEwRDQ4REU1NzM0Rjk2MDcyQUQzRUExMjhBNDUxREUyMEUyNUU0Nzc2NUE5RDI4RkUzNUYxNDJDNEI4OUQzNkI2NzEzMzk1NjZEMzIxOEYxN0U1NTRGMjhDQ0MyNkFBMDYxRThFMkVFQkQ5QzQ1QkUyQzVCNjVCM0ZGMjgzOTk3QTI4NjI2NzA2MTkxMUYyRkE1N0ExQTY5RkVBODZGQUZFQzFDRERBM0ZBNTc1Q0Y2MDBEQUNEQTM4MzVERTJGNEVCNjIzNDFBREE5RTE4MjUzMzY3Mzc3MUIzM0JBQUMzNDU2MTFGNTk0MUVERDZGOTk5MTk3Nzc0RDVENkFCQzYzMzMwREFEMzlERTFFQTYxQzNGMUExNUI5QkY3NTU2RjQ4M0Y5MzczOEY5OEM0OTZFRkZCOUEzM0QzQ0REN0MyM0JDMTIxNTE1MUZCRTdEREU2OTJBM0EyRjM2MjVENzYzQTgwQUY5NTc2QTBDRkI2OUU5MUNGMjM4Njg1Mjk5MkY4NUFGNjU4Njk1NDA2REU4REZGNDAwMzIzQkM3RDAwRkExMDBGNTk2ODcyNDlBOTMyQkFBRjA2QkZCQ0MyMTJDMTVEQTlGNTAyQTE1MTM3RDA1MDcxNzUwOTlCRjkzRjNDQkYwREZDNEM4QjVCN0EzMEJGMUQ2NUM0QTlCNTlCNzYxMjRBQTREOEZGMkNGQTVDRkUzQ0MwNDY2NTA5MzI4MkNGMkNERkY3NjEyN0Y4MDhGNERCRUFDNzUzOEU0NDVDOEQyMTUyOUNCNjAwMzU2MzFEREJBQzc1RDAwNUE5RDFDMEE5MzZBQzhGNjA2RkEwOTUzMTdDNDFCODIzODcyMzEwQ0ZCRTBDMDA4RkM4QTMzN0M2ODk5RDYyNjc0REY0OUI5RDcxQTdCMUVFMkU3NjBGODI3RjY0NkMzQTY4OTgxMTc3OUUzNkNBMDcyQjNGRjBENDE5QkZBRkMxRDdERTVBNzU1RkE0QzlCMEZDNjIyMkNBMERBRTk2RTgzRTA2MjU4QUVGREM4NjA4OTIyNjY2OTRFODJCQUMzNkIyNzUwM0Y3NTEzOEE2MERERkYzOEE5RUUzQzE4RUQ0RkU4NDhENzQzRDU4ODJBODBBMTJDRkE5NjZEQTRBQzdENkRDMDdEMEQzM0QxNTgyNjlBNjZDMDNBQjc0RjQxODdEMkYxRENEQzM5MTM1ODYyOTAwQTQ5MTU1QjE4RjY1RUQwNjZBNjY0MzZCMjI2QkUzNEM3RUQwOUQ1RDU1RDZDRjQ5RDEyRjk5Rjc1NURDNjQwNEU1OURBQUNBNTBDRUJCQjREQTg2QUJDMzBENDg0ODRBMkZCMTc0QzJBMzc0RDZBMzhFQTgwOUY4RTgxM0UzRjkyM0M5RTcyQjVDODI1MEEzNTQyOTA4Njc4OTlGRkM4NTYwRTU2Q0FGQjg4QzNEMEFCNzRGNzI3MzkzNzMyNzYwOUJCMDMxMDgxRUQxRDVGRjkyN0IyRkVBRjJDRUMwQjRFQkYwNjkzQkZCNjREMzJDNzQ0RDU4NDdFNTEzQUEyNERDOTk1ODNENkNBM0FEMjlBNjUxNEQ5M0RFMEI4REI0RTE3RjM0OThFMUFBMjkyRjBERURGQUQ3RTcwMzcxNDg4OEFFNDhENkVCN0NCQjk2QTQ3RkVFRUQ0N0RDNTE1NDNFQUJBMkU5NTRGIn19.",
+            "Accept": "*/*",
+            "User-Agent": "PostmanRuntime/7.29.2",
+            "X-Forwarded-Host": "api-int.express-scripts.io",
+            "X-Forwarded-Proto": "https",
+            "X-Request-Start": "1699390390451",
+            "Host": "api-int.express-scripts.io",
+            "Accept-Encoding": "gzip, deflate, br",
+            "X-Vcap-Request-Id": "ea3f9839-0426-4c9a-447a-391d5d3fd921",
+            "B3": "45613a772377e9f108c168a925cb8277-08c168a925cb8277",
+            "X-Cf-Instanceindex": "8",
+            "X-B3-Spanid": "08c168a925cb8277",
+            "X-Cf-Applicationid": "f4f4b10c-577e-4a8b-96a9-f2774ec0a280",
+            "X-Forwarded-For": "10.221.13.140, 10.228.51.241",
+            "Postman-Token": "7f6f4510-f988-466d-b6f2-9fd533452e4e",
+            "X-B3-Traceid": "45613a772377e9f108c168a925cb8277",
+            "Content-Length": "1008",
+            "ESRX-Request-ID": "6182f235-1be9-4f92-b201-05e83f902a50",
+            "Content-Type": "application/json"
+        },
+        "queryStringParameters": {},
+        "requestContext": {
+            "http": {
+                "method": "POST",
+                "path": "/evir/v1/interactions/customer/$ingest"
+            }
+        },
+        "body": "ewogICAgInRlbmFudElkIjogIjE2Nzc3NDczIiwKICAgICJlbnRpdHlOYW1lIjogImNpZ25hIiwKICAgICJwdWJsaXNoZXIiOiAiZ2JzU2FsZXNmb3JjZSIsCiAgICAic291cmNlU3lzdGVtIjogImdic1NhbGVzZm9yY2UiLAogICAgImNoYW5uZWwiOiAiZW1haWwiLAogICAgImNvbW11bmljYXRpb25EaXJlY3Rpb24iOiAibWVtYmVyVG9FbnRpdHkiLAogICAgInN0YXR1cyI6ICJjcmVhdGVkIiwKICAgICJpbmRpdmlkdWFsSWQiOiB7CiAgICAgICAgInR5cGUiOiAiaWVpZCIsCiAgICAgICAgInZhbHVlIjogIjEyMjMzNDQ1NTE5ODYiCiAgICB9LAogICAgImludGVyYWN0aW9uIjogewogICAgICAgICJ0eXBlIjogImdic0ludGVyYWN0aW9uIiwKICAgICAgICAiZGF0ZUNyZWF0ZWQiOiAiMjAyMy0wNy0yNVQyMToxNTowMi4wMDA0NTlaIiwKICAgICAgICAiaWQiOiAiZ2JzSW50ZXJhY3Rpb250ZXN0NzI1IgogICAgfSwKICAgICJpbnRlcmFjdGlvbkV2ZW50IjogewogICAgICAgICJkYXRlIjogIjIwMjMtMDctMjVUMjE6MTU6MDIuMDAwNDU5WiIsCiAgICAgICAgInJlc3VsdCI6ICJvZmZlckV4dGVuZGVkIiwKICAgICAgICAicmVzdWx0RGVzY3JpcHRpb24iOiAiT2ZmZXIgRXh0ZW5kZWQiCiAgICB9LAogICAgImRldGFpbHMiOiB7CiAgICAgICAgImNsaWVudElkZW50aWZpZXIiOiB7CiAgICAgICAgICAgICJncm91cElkIjogIklHIzA2OTAyNzk0MTAyMjk5NTY2Nzc2IgogICAgICAgIH0sCiAgICAgICAgImFjdGl2aXR5IjogewogICAgICAgICAgICAiY2F0ZWdvcnkiOiAiYXBwb2ludG1lbnQiLAogICAgICAgICAgICAiaWQiOiAidGVzdGlkIiwKICAgICAgICAgICAgInR5cGUiOiAidHlwZSIsCiAgICAgICAgICAgICJtZWRpdW0iOiAibWVkaXVtIiwKICAgICAgICAgICAgInN0YXJ0VGltZSI6ICIyMDIzLTEwLTE4VDE1OjEwOjE0LjM1NDAxOVoiLAogICAgICAgICAgICAiZW5kVGltZSI6ICIyMDIzLTEwLTE5VDE1OjEwOjE0LjM1NDAxOVoiCiAgICAgICAgfQogICAgfQp9",
+        "isBase64Encoded": true
+    },
+    "context": "<bootstrap.LambdaContext object at 0x7fdfbb1f5190>",
+    "decodedBody": {
+        "tenantId": "16777473",
+        "entityName": "cigna",
+        "publisher": "gbsSalesforce",
+        "sourceSystem": "gbsSalesforce",
+        "channel": "email",
+        "communicationDirection": "memberToEntity",
+        "status": "created",
+        "individualId": {
+            "type": "ieid",
+            "value": "1223344551986"
+        },
+        "interaction": {
+            "type": "gbsInteraction",
+            "dateCreated": "2023-07-25T21:15:02.000459Z",
+            "id": "gbsInteractiontest725"
+        },
+        "interactionEvent": {
+            "date": "2023-07-25T21:15:02.000459Z",
+            "result": "offerExtended",
+            "resultDescription": "Offer Extended"
+        },
+        "details": {
+            "clientIdentifier": {
+                "groupId": "IG#06902794102299566776"
+            },
+            "activity": {
+                "category": "appointment",
+                "id": "testid",
+                "type": "type",
+                "medium": "medium",
+                "startTime": "2023-10-18T15:10:14.354019Z",
+                "endTime": "2023-10-19T15:10:14.354019Z"
+            }
+        }
+    },
+    "xray_trace_id": "1-654aa3b6-55344cc10597e20841638513"
 }
