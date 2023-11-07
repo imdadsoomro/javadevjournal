@@ -1,133 +1,136 @@
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import json
+import os
+from base64 import b64decode
+from os import getenv
+from uuid import uuid4
 
-public class CollectorsExamples {
+import boto3
+from aws_lambda_powertools import Logger, Metrics
+from aws_lambda_powertools.metrics import Metrics, MetricUnit
+from evir_models.envelopes import (
+    EnvelopeSource,
+    EnvelopeSourceComponent,
+    wrap_with_ingress_v1,
+)
+from evir_models.validation import get_validator_by_schema_name
+from pkg_resources import get_distribution
 
-    public static void main(String[] args){
-        System.out.println("*****Examples of different Collectors methods*****");
+from receive_customer_interaction_v1.models import SubmitInteractionResult
 
-        System.out.println("Example of Collectors.toList : ");
-        System.out.println(Stream.of(4,3,2,7,1).collect(Collectors.toList()));
+logger = Logger()
+kinesis_client = boto3.client("kinesis")
+stream_name = os.environ["KINESIS_STREAM_NAME"]
 
-        System.out.println("***********************");
-        System.out.println("Example of Collectors.toSet : ");
-        System.out.println(Stream.of(1,7,9,2,3,1).collect(Collectors.toSet()));
 
-        System.out.println("***********************");
-        System.out.println("Example of Collectors.toCollection : ");
-        Stream<Integer> stream = Stream.of(1,7,9,2,3,1);
-
-        Set<Integer> set = stream.collect(Collectors
-                .toCollection(TreeSet::new));
-        System.out.println(set);
-
-        System.out.println("***********************");
-        System.out.println("Example of toMap and toConcurrentMap : ");
-        Stream<String> wordStream = Stream.of("one", "hello", "opera", "hi",
-                "music");
-        HashMap<Character, String> m = wordStream.collect(
-                Collectors.toMap(word -> word.charAt(0),
-                        word -> word,
-                        (word1, word2) -> word1 +","+ word2,
-                        HashMap::new));
-        System.out.println(m);
-
-        System.out.println("***********************");
-        System.out.println("Example of summingInt,summingLong and summingDouble : ");
-        Stream<Integer> intStream = Stream.of(1,2,3,4,5);
-        System.out.println(intStream.collect(Collectors.summingInt(Integer::intValue)));
-
-        System.out.println("***********************");
-        System.out.println("Example of averagingInt,averagingLong and averagingDouble : ");
-        Stream<Integer> intStream1 = Stream.of(5,5,4,6,4);
-        System.out.println(intStream1.collect(Collectors.averagingInt(Integer::intValue)));
-
-        System.out.println("***********************");
-        System.out.println("Example of counting, maxBy, minBy : ");
-        Stream<String> strStream = Stream.of("1","2","3","4","5");
-        System.out.println(strStream.collect(Collectors.counting()));
-
-        Stream<Integer> intStream2 = Stream.of(4,2,6,12,33,44);
-        System.out.println(intStream2.collect(Collectors.maxBy(Comparator.naturalOrder())));
-
-        System.out.println("***********************");
-        System.out.println("Example of groupingBy and partitioningBy : ");
-        Stream<String> strStream2 = Stream.of("one","two","b","d","three");
-        System.out.println(strStream2.collect(Collectors.groupingBy(String::length)));
-
-        Stream<Integer> intStream3 = Stream.of(1, 4, 5, 2, 7);
-        System.out.println(intStream3.collect(Collectors.partitioningBy(e -> e % 2 == 0)));
-
-        System.out.println("***********************");
-        System.out.println("Example of summarizingInt,summarizingDouble and summarizingLong : ");
-        Stream<Integer> intStream4 = Stream.of(5, 4, 3, 2, 1);
-        Map<Integer, IntSummaryStatistics> map = intStream4.collect(Collectors.groupingBy(Integer::intValue, Collectors.summarizingInt(Integer::intValue)));
-
-        System.out.println(map);
-
-        System.out.println("***********************");
-        System.out.println("Example of joining : ");
-        Stream<String> strStream3 = Stream.of("one","two","three","four","five");
-        System.out.println(strStream3.collect(Collectors.joining()));
-
-        Stream<String> strStream4 = Stream.of("one","two","three","four","five");
-        System.out.println(strStream4.collect(Collectors.joining("-")));
-
-        Stream<String> strStream5 = Stream.of("one","two","three","four","five");
-        System.out.println(strStream5.collect(Collectors.joining("-","start:",":end")));
-
-        System.out.println("***********************");
-        System.out.println("Example of mapping,flatMapping and reducing : ");
-        Stream<String> strStream6 = Stream.of("one","two","three","four");
-        System.out.println(strStream6.collect(Collectors.groupingBy(String::length,Collectors.mapping(String::toUpperCase,Collectors.toSet()))));
-
-        Stream<String> strStream7 = Stream.of("one","two","three","four");
-        System.out.println(strStream7.collect(Collectors.reducing((str1,str2) -> str1 + str2)).orElse("-"));
-
-        System.out.println("***********************");
-        System.out.println("Example of collectingAndThen : ");
-        Stream<String> strStream8 = Stream.of("sunday","monday","tuesday","wednesday");
-        List<String> strList = strStream8.collect(Collectors.collectingAndThen(Collectors.toList(),Collections::unmodifiableList));
-        System.out.println(strList);
+def respond_lambda(status_code, body) -> dict:
+    return {
+        "statusCode": status_code,
+        "headers": {"content-type": "application/json"},
+        "body": body.json(exclude_none=True),
+        "isBase64Encoded": False,
     }
-}
 
 
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+def publish_to_stream(request, ingest_id):
+    wrapped_ingress_interaction = wrap_with_ingress_v1(
+        source=EnvelopeSource(
+            component=EnvelopeSourceComponent(
+                name="receive-customer-interaction-v1",
+                version=getenv("EIR_VERSION", "not-specified"),
+            ),
+            origin_schema="evir_interaction_customer_v1",
+            channel="/evir/v1/interactions/customer/$ingest",
+        ),
+        interaction=request,
+        ingest_id=ingest_id,
+    )
 
-import java.util.Arrays;
-import java.util.List;
+    kinesis_client.put_record(
+        StreamName=stream_name,
+        Data=json.dumps(wrapped_ingress_interaction).encode(),
+        PartitionKey=str(uuid4()),
+    )
 
-import static org.mockito.Mockito.*;
 
-@SpringBootTest
-public class FIGGResponseValidatorTest {
+def create_metrics():
+    metrics = Metrics()
+    metrics.set_default_dimensions(
+        env=getenv("ENV", "not-specified"),
+    )
+    return metrics
 
-    @InjectMocks
-    private FIGGResponseValidator figgResponseValidator;
 
-    @Mock
-    private CustomerOfferServiceValidator customerOfferServiceValidator;
+METRICS = create_metrics()
 
-    @Test
-    public void testValidateFiggAccountExceptionHandling() {
-        List<FiggCustomerOfffer> figgAccounts = Arrays.asList(new FiggCustomerOfffer(), new FiggCustomerOfffer());
+logger.info(
+    "initialising receive-customer-interaction-v1",
+    extra={
+        "ingestStream": stream_name,
+        "dependencies": {
+            "evirModels": get_distribution("cigna-clinical-cis-evir-models").version
+        },
+    },
+)
 
-        // Set up the mock to throw an exception when validate is called
-        doThrow(new RuntimeException("Test Exception")).when(customerOfferServiceValidator).validate(any(FiggCustomerOfffer.class));
 
-        // Call the method that you want to test
-        figgResponseValidator.validateFiggAccount(figgAccounts);
+@METRICS.log_metrics
+def lambda_handler(event, context):
+    try:
+        logger.append_keys(
+            esrxRequestId=event.get("headers").get("ESRX-Request-ID", "not-provided")
+        )
+        body = event["body"]
 
-        // Verify that the System.out.println("test"); statement is executed
-        verify(customerOfferServiceValidator, times(figgAccounts.size())).validate(any(FiggCustomerOfffer.class));
-        for (FiggCustomerOfffer figAccount : figgAccounts) {
-            System.out.println("test");
-        }
-    }
-}
+        if event["isBase64Encoded"] is True:
+            body = json.loads(b64decode(body.encode()).decode("utf-8"))
 
+        logger.debug(
+            "received event",
+            extra={
+                "event": event,
+                "context": context,
+                "decodedBody": body,
+            },
+        )
+        validator = get_validator_by_schema_name("evir_interaction_customer_v1")
+
+        if isinstance(body, dict):
+            request = body
+        else:
+            request = json.loads(body)
+
+        issues = validator.validate(request)
+        validation_issues = list(issues)
+
+        if len(validation_issues) > 0:
+            logger.warning(
+                "invalid interaction submitted",
+                extra={
+                    "issues": validation_issues,
+                    "interaction": request,
+                },
+            )
+            METRICS.add_metric(
+                name="SubmissionRejectedCount", unit=MetricUnit.Count, value=1
+            )
+            return respond_lambda(
+                "400", SubmitInteractionResult.from_failed_validation(validation_issues)
+            )
+
+        ingest_id = str(uuid4())
+        publish_to_stream(request, ingest_id)
+
+        METRICS.add_metric(name="SubmissionAcceptedCount", unit=MetricUnit.Count, value=1)
+
+        return respond_lambda("200", SubmitInteractionResult.success(ingest_id))
+
+    except Exception:  # pylint:disable=broad-except
+        logger.exception(
+            "unexpected exception encountered",
+            extra={
+                "body": event.get("body"),
+                "isBase64Encoded": event.get("isBase64Encoded"),
+            },
+        )
+        METRICS.add_metric(name="SubmissionRejectedCount", unit=MetricUnit.Count, value=1)
+        return respond_lambda("500", SubmitInteractionResult.system_error())
