@@ -1,136 +1,32 @@
-import json
-import os
-from base64 import b64decode
-from os import getenv
-from uuid import uuid4
+1. "eio-prod-wal-batched-glue-db"."raw_data"
+2. "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded"
 
-import boto3
-from aws_lambda_powertools import Logger, Metrics
-from aws_lambda_powertools.metrics import Metrics, MetricUnit
-from evir_models.envelopes import (
-    EnvelopeSource,
-    EnvelopeSourceComponent,
-    wrap_with_ingress_v1,
-)
-from evir_models.validation import get_validator_by_schema_name
-from pkg_resources import get_distribution
+Following are two separate queries with one sample record each. Can you write me query to get the differences. You can join on "eio-prod-wal-batched-glue-db"."raw_data".interactionid and "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded".subject.interaction.id
 
-from receive_customer_interaction_v1.models import SubmitInteractionResult
+"eio-prod-wal-batched-glue-db"."raw_data" has higher number of records than "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded". I want to look for missing records in "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded".
 
-logger = Logger()
-kinesis_client = boto3.client("kinesis")
-stream_name = os.environ["KINESIS_STREAM_NAME"]
+SELECT eiouniqueid,body,originsystemclientid,originalschema,eio_shared_version,partition_0,partition_1,partition_2 FROM "eio-prod-wal-batched-glue-db"."raw_data" LIMIT 1
+221502286-20017-1700395084326
+{individualenterpriseid=221502286, accountnumber=null, clientid=null, patientid=null, householdid=null, memberid=null, interactionevent=interaction.viewed, interactioneventvalue=JAMES has invited you to activate a myCigna account, channel=email, interactionpoint=aws_ses, interactioneventdate=2023-11-19T12:03:30.000000-0000, communicationdirection=entityToCigna, sourcesystem=crm, opportunityid=null, opportunitypath=null, outcome=null, outcomereason=null, details={hi=null, sourcesystemid=3c7ced70-6f6a-4151-882a-9d8a1e361a46, interactioneventdescription=viewed, cignalocale=null, callbackrequested=No, childopportunityid=null, contenttemplatename=20017_mycigna_en_us, contentsource=Filenet, referencedata=null, contactinfo=cmcross802@gmail.com, entitylocale=en_us, callback=No, callbackrepeat=No, transfersuceeded=No, transfer=No, transfersecond=No, callnetpromoter=0, interactioneventerrorcode=null, interactioneventerrordescription=null, contenttemplatetype=CRMCustomerInteractions,Email, pharmacyproductcode=null, sourcesystemopportunityid=null, applicationuniqueid=null, communicationname=null, collateralid=null, sourcesystemid=3c7ced70-6f6a-4151-882a-9d8a1e361a46, attemptcount=null, callbacktimepreference=null, docid=null, messagetype=null, conversationtype=null, notificationid=464d4091-3d21-4658-937b-515911d0e6be, notificationtrackingid=0100018bd46b72ea-1edf17be-4daf-44f3-a837-fe9e2b7c01ba-000000, patientidtype=null, relatednotificationtrackingid=null, affiniumprogramid=null, versionid=null, leadkeyid=null, enterpriseidtype=null, eiorredriveversion=null, eiorredriveattempts=null, ogindicator=null, itmflag=null, agentid=null, outputtemplatename=null, digitalindicator=null, cignalocale=null, communicationname=null, contactinfo=cmcross802@gmail.com, enterpriseid=null, runid=null, segmentname=null, sourcesystemid=3c7ced70-6f6a-4151-882a-9d8a1e361a46, stepid=null, parentsourcesystemid=null, collateralname=null, segmentname=null, collateralid=null, enterpriseid=null, batchid=null, customername=null, firstname=null, lastname=null, membernumber=null, phonenumber=null, productid=null, groupid=null, lineofbusiness=null, parentsourcesystemid=null, lobbrandingcd=null, channeltypecode=null, interactiondescription=null, oppor_map_key=null, response_id=null, presentationid=null, contentsource=Filenet, contenttemplatetype=CRMCustomerInteractions,Email, stepname=null, calltoaction=null, opportunityweight=null, calltoaction=null, eml_addr=null}, interactionid=221502286-20017-1700395084326, publisher=crm, recordtype=crm_ses, datecreated=2023-11-19T12:03:30.000000-0000, status=created, sourcesystemid=null, originalinteractionschema=com.cigna.eior.interactions, originalinteractionschemaversion=v1, crm300_migration_defaults=null, correlationidentifier=464d4091-3d21-4658-937b-515911d0e6be, interactionpath=null, patientidtype=null, agentgroup=null, claimids=null, parentinteractionidentifier=null}
+legacy_kafka_interaction_v1
+interaction_v1
+1.6.2
+2023
+11
+47
 
 
-def respond_lambda(status_code, body) -> dict:
-    return {
-        "statusCode": status_code,
-        "headers": {"content-type": "application/json"},
-        "body": body.json(exclude_none=True),
-        "isBase64Encoded": False,
-    }
-
-
-def publish_to_stream(request, ingest_id):
-    wrapped_ingress_interaction = wrap_with_ingress_v1(
-        source=EnvelopeSource(
-            component=EnvelopeSourceComponent(
-                name="receive-customer-interaction-v1",
-                version=getenv("EIR_VERSION", "not-specified"),
-            ),
-            origin_schema="evir_interaction_customer_v1",
-            channel="/evir/v1/interactions/customer/$ingest",
-        ),
-        interaction=request,
-        ingest_id=ingest_id,
-    )
-
-    kinesis_client.put_record(
-        StreamName=stream_name,
-        Data=json.dumps(wrapped_ingress_interaction).encode(),
-        PartitionKey=str(uuid4()),
-    )
-
-
-def create_metrics():
-    metrics = Metrics()
-    metrics.set_default_dimensions(
-        env=getenv("ENV", "not-specified"),
-    )
-    return metrics
-
-
-METRICS = create_metrics()
-
-logger.info(
-    "initialising receive-customer-interaction-v1",
-    extra={
-        "ingestStream": stream_name,
-        "dependencies": {
-            "evirModels": get_distribution("cigna-clinical-cis-evir-models").version
-        },
-    },
-)
-
-
-@METRICS.log_metrics
-def lambda_handler(event, context):
-    try:
-        logger.append_keys(
-            esrxRequestId=event.get("headers").get("ESRX-Request-ID", "not-provided")
-        )
-        body = event["body"]
-
-        if event["isBase64Encoded"] is True:
-            body = json.loads(b64decode(body.encode()).decode("utf-8"))
-
-        logger.debug(
-            "received event",
-            extra={
-                "event": event,
-                "context": context,
-                "decodedBody": body,
-            },
-        )
-        validator = get_validator_by_schema_name("evir_interaction_customer_v1")
-
-        if isinstance(body, dict):
-            request = body
-        else:
-            request = json.loads(body)
-
-        issues = validator.validate(request)
-        validation_issues = list(issues)
-
-        if len(validation_issues) > 0:
-            logger.warning(
-                "invalid interaction submitted",
-                extra={
-                    "issues": validation_issues,
-                    "interaction": request,
-                },
-            )
-            METRICS.add_metric(
-                name="SubmissionRejectedCount", unit=MetricUnit.Count, value=1
-            )
-            return respond_lambda(
-                "400", SubmitInteractionResult.from_failed_validation(validation_issues)
-            )
-
-        ingest_id = str(uuid4())
-        publish_to_stream(request, ingest_id)
-
-        METRICS.add_metric(name="SubmissionAcceptedCount", unit=MetricUnit.Count, value=1)
-
-        return respond_lambda("200", SubmitInteractionResult.success(ingest_id))
-
-    except Exception:  # pylint:disable=broad-except
-        logger.exception(
-            "unexpected exception encountered",
-            extra={
-                "body": event.get("body"),
-                "isBase64Encoded": event.get("isBase64Encoded"),
-            },
-        )
-        METRICS.add_metric(name="SubmissionRejectedCount", unit=MetricUnit.Count, value=1)
-        return respond_lambda("500", SubmitInteractionResult.system_error())
+SELECT version,jobid,status,migration,objectkey,nativeid,source,subject,originschema,migrationid,year,month,day FROM "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded" limit 1;
+2023_07_28_12_57_25
+f52875e6-e2b6-4e99-89e5-7d908d84e237
+succeeded
+eir_internal_v1_to_evir_customer_v1
+okv1:8388abfd9bb1219fb75a0b85035cbc94a7a5922cae1c3dcff2e9b29d29a0a08f
+eiouid:0a130720-df61-4cf3-9071-212d1cb0401c
+s3://eio-prod-operations-storage-647430331721/migrate_interaction/migrations/eir_internal_v1_to_evir_customer_v1_failed_invalid/year=2023/month=07/day=23/eio-prod-operations-migration-storage-9-2023-07-23-14-59-55-3378bb6c-bfb5-31d3-9525-3459f2a7dd6f.gz
+{tenantid=16777473, entityname=cigna, individualid={type=ieid, value=55128560}, interaction={type=tpv, datecreated=2021-07-09T19:03:00.000000-0000, id=4b0825eb-64c2-4668-8269-d34a3b2b52db, point=MyCigna.Wellness.Marketplace, description=null, path=null}, interactionevent={date=2021-04-01T09:04:11.000000+0000, description=AYCO|Personalized Financial Coaching, result=presented, resultdescription=null}, publisher=myCigna, sourcesystem=myCigna, channel=web, communicationdirection=memberToEntity, status=created, details=null}
+interaction_v1
+mig:ee0a582a-dc51-44fc-a652-531981c9403a
+2023
+08
+15
