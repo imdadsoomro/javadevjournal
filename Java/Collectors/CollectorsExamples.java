@@ -30,3 +30,22 @@ mig:ee0a582a-dc51-44fc-a652-531981c9403a
 2023
 08
 15
+####################
+SELECT
+    rd.eiouniqueid,
+    rd.body,
+    rd.originsystemclientid,
+    rd.originalschema,
+    rd.eio_shared_version,
+    rd.partition_0,
+    rd.partition_1,
+    rd.partition_2
+FROM
+    "eio-prod-wal-batched-glue-db"."raw_data" rd
+LEFT JOIN
+    "eio-prod-evir-migration-glue-db"."migration_eir_internal_v1_to_evir_customer_v1_succeeded" mig
+ON
+    rd.interactionid = mig.subject.interaction.id
+WHERE
+    mig.subject.interaction.id IS NULL
+LIMIT 1;
