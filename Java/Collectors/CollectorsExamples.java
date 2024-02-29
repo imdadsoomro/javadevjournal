@@ -5,6 +5,29 @@ import java.util.stream.Stream;
 public class CollectorsExamples {
 
     public static void main(String[] args){
+        /*
+        I have following two hashmaps in java. I want to merge these maps into one hashmap. If the key is same, i want to compare the fields in value object. If page, section and fieldId are different in CHCompanyDefaultsModel, i want to keep the values from chDefaultsResponseMap. If they are same, i want to keep one record. If only one is available then i want to keep that one value object. Can you write a code with the help of java8.  
+        chDefaultsResponseMap = {HashMap@28655}  size = 1
+ {Long@28665} 17062 -> {ArrayList@28666}  size = 83
+  key = {Long@28665} 17062
+   value = 17062
+  value = {ArrayList@28666}  size = 83
+   0 = {CHCompanyDefaultsModel@28668} "CHCompanyDefaultsModel{name='dbaName', section='business_information', page='API', defaultValue='', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=124, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   1 = {CHCompanyDefaultsModel@28669} "CHCompanyDefaultsModel{name='legal_business_name', section='business_information', page='API', defaultValue='MMIS TEST LEGAL', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=93, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   2 = {CHCompanyDefaultsModel@28670} "CHCompanyDefaultsModel{name='businessStartedOn', section='business_information', page='API', defaultValue='2023-01-01', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=167, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   3 = {CHCompanyDefaultsModel@28671} "CHCompanyDefaultsModel{name='organizationType', section='business_information', page='API', defaultValue='Sole Proprietorship', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=40, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+
+
+
+   chDefaultsAdminResponseMap = {HashMap@28659}  size = 1
+ {Long@29054} 17062 -> {ArrayList@29055}  size = 146
+  key = {Long@29054} 17062
+  value = {ArrayList@29055}  size = 146
+   0 = {CHCompanyDefaultsModel@29057} "CHCompanyDefaultsModel{name='dbaName', section='business_information', page='API', defaultValue='', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=124, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   1 = {CHCompanyDefaultsModel@29058} "CHCompanyDefaultsModel{name='legal_business_name', section='business_information', page='API', defaultValue='MMIS TEST LEGAL', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=93, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   2 = {CHCompanyDefaultsModel@29059} "CHCompanyDefaultsModel{name='businessStartedOn', section='business_information', page='API', defaultValue='2023-01-01', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=167, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+   3 = {CHCompanyDefaultsModel@29060} "CHCompanyDefaultsModel{name='organizationType', section='business_information', page='API', defaultValue='Sole Proprietorship', type='TEXTBOX', editable=true, visible=false, pii=false, options=null, fieldId=40, companyId=17062, prefix='null', postfix='null', menuItemKey='null', regex='null', required=true}"
+        */
         System.out.println("*****Examples of different Collectors methods*****");
 
         System.out.println("Example of Collectors.toList : ");
