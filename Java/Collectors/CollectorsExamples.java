@@ -6,6 +6,64 @@ public class CollectorsExamples {
 
     public static void main(String[] args){
         /*
+        import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class MergeMaps {
+
+    public static void main(String[] args) {
+        // Example maps initialization
+        HashMap<Long, ArrayList<CHCompanyDefaultsModel>> chDefaultsResponseMap = new HashMap<>();
+        HashMap<Long, ArrayList<CHCompanyDefaultsModel>> chDefaultsAdminResponseMap = new HashMap<>();
+
+        // Populate your maps with data
+
+        // Merge the two maps
+        HashMap<Long, ArrayList<CHCompanyDefaultsModel>> mergedMap = new HashMap<>(chDefaultsResponseMap);
+
+        chDefaultsAdminResponseMap.forEach((key, value) -> mergedMap.merge(key, value, (list1, list2) -> {
+            Map<String, CHCompanyDefaultsModel> tempMap = new HashMap<>();
+            
+            // Assume CHCompanyDefaultsModel has proper equals & hashCode based on page, section, and fieldId
+            list1.forEach(model -> tempMap.put(model.getPage() + model.getSection() + model.getFieldId(), model));
+            list2.forEach(model -> tempMap.putIfAbsent(model.getPage() + model.getSection() + model.getFieldId(), model));
+            
+            return new ArrayList<>(tempMap.values());
+        }));
+
+        // mergedMap now contains the combined data
+    }
+
+    // Assume this is your model class
+    static class CHCompanyDefaultsModel {
+        // Fields declaration
+
+        // Assume getters for page, section, and fieldId
+
+        // You might need to override equals and hashCode based on page, section, and fieldId
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            CHCompanyDefaultsModel that = (CHCompanyDefaultsModel) obj;
+            return page.equals(that.page) &&
+                    section.equals(that.section) &&
+                    fieldId == that.fieldId;
+        }
+
+        @Override
+        public int hashCode() {
+            // Suitable hash code generation based on page, section, and fieldId
+            return Objects.hash(page, section, fieldId);
+        }
+    }
+}
+
+        */
+        /*
         I have following two hashmaps in java. I want to merge these maps into one hashmap. If the key is same, i want to compare the fields in value object. If page, section and fieldId are different in CHCompanyDefaultsModel, i want to keep the values from chDefaultsResponseMap. If they are same, i want to keep one record. If only one is available then i want to keep that one value object. Can you write a code with the help of java8.  
         chDefaultsResponseMap = {HashMap@28655}  size = 1
  {Long@28665} 17062 -> {ArrayList@28666}  size = 83
